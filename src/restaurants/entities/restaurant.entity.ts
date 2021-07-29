@@ -19,14 +19,5 @@ export class Restaurant{//Restaurant을 위한 object type 생성
     @Length(5)
     name: string;
 
-    @Field(type => Boolean, {nullable: true, defaultValue: true})
-    @Column({default: true}) //database
-    @IsOptional()//Boolean이 없어도 진행됨
-    @IsBoolean()
-    isVegan: boolean;
 
-    @Field(type => String, {defaultValue: '강남'})
-    @Column()
-    @IsString()
-    address: string;
 }

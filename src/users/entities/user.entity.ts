@@ -7,9 +7,8 @@ import { InternalServerErrorException } from "@nestjs/common";
 import { IsEmail, IsEnum, IsString } from "class-validator";
 
 enum UserRole {
-    Client, //0
-    Owner, //1
-    Delivery, //2
+    Member, //0
+    Manager, //1
 }
 
 registerEnumType(UserRole, {name: "UserRole"}); //graphQL enum type만들기 
@@ -26,6 +25,10 @@ export class User extends CoreEntity{ //CoreEntity로 extend -> 모든 entities�
     @Column()
     @Field(type=>String)
     password: string;
+
+    @Column()
+    @Field(type=>String)
+    name: string;
 
     
     @Column( { type: 'enum', enum : UserRole}) //데이터베이스에 type이 enum인 UserRole

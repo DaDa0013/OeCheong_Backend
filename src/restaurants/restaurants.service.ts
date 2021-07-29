@@ -5,22 +5,25 @@ import { CreateRestaurantDto } from "./dtos/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dtos/update-restaurant.dto";
 import { Restaurant } from "./entities/restaurant.entity";
 
-@Injectable()
-export class RestaurantService{
-    constructor(
-        @InjectRepository(Restaurant)
-        private readonly restaurants: Repository<Restaurant>,
-        ){} //Restaurant entity의 repository를 inject하는 것, 이름은 restaurants이고 class는 Restaurant entity를 가진 repository (this.restaurants.__ 으로 접근 가능해짐 )
-    getAll():Promise<Restaurant[]>{ //find는 async method이므로 Promise를 써줘야함
-        return this.restaurants.find();
-    }
+    @Injectable()
+    export class RestaurantService{
+        constructor(
+            @InjectRepository(Restaurant)
+            private readonly restaurants: Repository<Restaurant>,
+        ){}//repository(restaurants)를 inject하기
 
-    createRestaurant(createRestaurantDto:CreateRestaurantDto):Promise<Restaurant>{
-        const newRestaurant=this.restaurants.create(createRestaurantDto);//code에만 존재하고 DB에 실제로 저장되지는 않음 
-        return this.restaurants.save(newRestaurant);
-    }
+        getAll(): Promise<Restaurant[]>{//모든 restaurant를 가져오는 service
+            return this.restaurants.find();  //restaurants는 restaurant entity의 repository
+        }
 
-    upadteRestaurant({id,data}:UpdateRestaurantDto){
-        return this.restaurants.update(id,{...data});
-    }//첫번쨰 argument :search하는 것 (id를 가진 애 search)
-}
+        createRestaurant(
+            createRestaurantDto: CreateRestaurantDto,
+        ): Promise<Restaurant>{//return 타입이 restaurant
+            const newRestaurant = this.restaurants.create(createRestaurantDto);//새로운 instance를 만든 것으로, DB는 전혀 건들지 않음
+            return this.restaurants.save(newRestaurant);//save method로 DB에 저장
+        }
+        updateRestaurant({id, data}:UpdateRestaurantDto){
+            return this.restaurants.update(id, {...data}); //update하고 싶은 entity의 field 보내야함 & 저기엔 update 하고 싶은 object의 id 넣기
+        } //저 id를 가진 Restaurant를 update
+        //update()sms db에 해당 entity가 있는지 확인 안함
+    }

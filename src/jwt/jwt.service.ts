@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Global, Injectable } from '@nestjs/common';
+
 
 @Injectable()
 export class JwtService {
     hello(){
-        console.log('hello');
+        console.log('hello')
     }
 }

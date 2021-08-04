@@ -1,6 +1,11 @@
 
-import { Resolver, Query, Mutation, Args} from "@nestjs/graphql";
+import { UseGuards } from "@nestjs/common";
+import { Resolver, Query, Mutation, Args, Context} from "@nestjs/graphql";
+import { AuthUser } from "src/auth/auth-user.decorator";
+import { AuthGuard } from "src/auth/auth.guard";
+import { UserProfileInput, UserProfileOutput } from "src/users/dtos/user-profile.dto";
 import { CreateAccountInput, CreateAccountOutput } from "./dtos/create-account.dto";
+import { EditProfileInput, EditProfileOutput } from "./dtos/edit-profile.dto";
 import { LoginInput, LoginOutput} from "./dtos/login.dto";
 import { User } from "./entities/user.entity";
 import { UsersService } from "./users.service";
@@ -41,5 +46,50 @@ export class UsersResolver {
                 error,
             };
         }
+    }
+    @Query(returns => User)
+    @UseGuards(AuthGuard)
+    me(@AuthUser() authUser: User){
+        return authUser;
+    }//middleware 구현 //로그인한 사람이 누구인지 반환
+
+    @UseGuards(AuthGuard)
+    @Query(returns => UserProfileOutput)
+    async userProfile(@Args()userProfileInput: UserProfileInput): Promise<UserProfileOutput>{ //user id가져오기
+        try {
+            const user = await this.usersService.findById(userProfileInput.userId)
+            if (!user){
+                throw Error(); //user 찾지 못하면 error로
+            }
+            return{
+                ok:true,
+                user,
+            };
+        }catch(e){
+            return{
+                error:"User Not Found",
+                ok: false,
+
+            }
+        };     
+    }
+
+    @UseGuards(AuthGuard)
+    @Mutation(returns=> EditProfileOutput)
+    async editProfile(@AuthUser() authUser: User, @Args('input') editProfileInput: EditProfileInput,
+    ): Promise<EditProfileOutput>{
+        try{
+            await this.usersService.editProfile(authUser.id, editProfileInput);
+            return {
+                ok:true,
+            }
+        }catch(error)
+        {
+            return  {
+                ok: false,
+                error
+            }
+        }
+
     }
 }

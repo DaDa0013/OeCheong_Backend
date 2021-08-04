@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Query, RequestMethod } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateAccountInput } from "./dtos/create-account.dto";
@@ -7,16 +7,14 @@ import { User } from "./entities/user.entity";
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "src/jwt/jwt.service";
+import { EditProfileInput } from "./dtos/edit-profile.dto";
 
 @Injectable()
 export class UsersService{
     constructor(
         @InjectRepository(User) private readonly users: Repository <User>,//User entity의 InjectRepository 불러오기 & type이 repository이고 repository type은 user enitity
-        private readonly config: ConfigService, // token 파트에서 ConfigService import해서 사용하려고
         private readonly jwtService: JwtService, //nestjs는 클래스 타입만 보고 import 알아서 찾아줌
-        ){
-            this.jwtService.hello();
-        }
+        ){}
 
     async createAccount({
         email,
@@ -63,7 +61,7 @@ export class UsersService{
                     error:"Wrong password",
                 };
             }
-            const token =jwt.sign({id:user.id},this.config.get('SECRET_KEY'))//지정(sign)하기 & sign()안에는 무엇을 넣어 주고 싶은지(여기선 user ID)
+            const token = this.jwtService.sign(user.id);//이 module을 내 백엔드만으로 특정함
             return{
                 ok:true,
                 token,
@@ -76,4 +74,18 @@ export class UsersService{
         }
         
     }
+    async findById(id:number): Promise<User>{
+        return this.users.findOne({id});
+
+    }
+    async editProfile(userId: number, {email, password}: EditProfileInput){
+        const user = await this.users.findOne(userId);
+        if(email){
+            user.email = email
+        }
+        if(password){
+            user.password = password
+        }
+        return this.users.save(user) //db에 entity 존재 유무 체크 안함
+    }// save는 entity 없으면 생성함
 }

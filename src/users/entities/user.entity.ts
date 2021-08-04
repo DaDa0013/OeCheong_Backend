@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { CoreEntity } from "src/common/entities/core.entity";
-import { BeforeInsert, Column, Entity } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { InternalServerError } from "http-errors";
 import { InternalServerErrorException } from "@nestjs/common";
@@ -26,10 +26,6 @@ export class User extends CoreEntity{ //CoreEntity로 extend -> 모든 entities�
     @Field(type=>String)
     password: string;
 
-    @Column()
-    @Field(type=>String)
-    name: string;
-
     
     @Column( { type: 'enum', enum : UserRole}) //데이터베이스에 type이 enum인 UserRole
     @Field(type=> UserRole) //type이 UserRole인 graphQL
@@ -38,6 +34,7 @@ export class User extends CoreEntity{ //CoreEntity로 extend -> 모든 entities�
 
 
     @BeforeInsert()//DB에 저장하기 전에 password hash해주기
+    @BeforeUpdate()//password 저장하기 전에 hash하도록
     async hashPassword(): Promise<void> {
         try{
         this.password = await bcrypt.hash(this.password, 10); //hash round는 10으로

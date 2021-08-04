@@ -9,5 +9,6 @@ import { UsersService } from './users.service';
 @Module({
     imports: [TypeOrmModule.forFeature([User])], //service는 repository 필요로 하기 떄문에 // ConfigService는 token 생성할 때 import해주려고 users.module안에 configService 추가
     providers:[UsersResolver, UsersService],
+    exports:[UsersService]
 })
 export class UsersModule {}

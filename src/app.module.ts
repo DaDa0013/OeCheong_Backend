@@ -1,14 +1,15 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import * as Joi from 'joi'; //타입스크립트나 NestJS로 되어있지 않을때 패키지 import
-import { Restaurant } from './restaurants/entities/restaurant.entity';
-import { RestaurantsModule } from './restaurants/restaurants.module';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
+import { JwtMiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
+
 
 
 @Module({
@@ -26,7 +27,7 @@ import { JwtModule } from './jwt/jwt.module';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
-        SECRET_KEY: Joi.string().required(), //token 지정을 위해 사용하는 privateKey
+        PRIVATE_KEY: Joi.string().required(), //token 지정을 위해 사용하는 privateKey
       }),
     }),
     TypeOrmModule.forRoot({
@@ -40,14 +41,24 @@ import { JwtModule } from './jwt/jwt.module';
       logging: process.env.NODE_ENV ==="prod", //DB에 돌아가는 모든 로그 확인
       entities:[User],
     }),
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot({ //dynamic module로 설정이 존재
       autoSchemaFile: true,  //root module 설정
+      context: ({req}) => ({user: req["user"]}), //graphql resolver의 context를 통해 공유
     }),
     UsersModule,
-    CommonModule,
-    JwtModule.forRoot(),
+    JwtModule.forRoot({
+      privateKey: process.env.PRIVATE_KEY,
+    }),
+    AuthModule, //JwtModule처럼 static module은 어떠한 설정도 적용되어 있지않음
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer: MiddlewareConsumer){
+    consumer
+      .apply(JwtMiddleware)
+      .forRoutes({path:"/graphql", method: RequestMethod.POST});
+  }
+}
+

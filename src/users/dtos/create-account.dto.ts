@@ -6,9 +6,10 @@ import { User } from "../entities/user.entity";
 
 @InputType()
 export class CreateAccountInput extends PickType(User, [
-    "email",
-    "password", 
-    "role",
+    'email',
+    'studentId',
+    'password', 
+    'role'
 ]) {}//pickType의 class에 User와 우리가 가지고 싶은 거
 
 @ObjectType()

@@ -1,8 +1,7 @@
-import { Field, InputType, ObjectType, registerEnumType } from "@nestjs/graphql";
+import { Field, InputType, Int, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { CoreEntity } from "src/common/entities/core.entity";
 import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import * as bcrypt from "bcrypt";
-import { InternalServerError } from "http-errors";
 import { InternalServerErrorException } from "@nestjs/common";
 import { IsEmail, IsEnum, IsString } from "class-validator";
 
@@ -13,14 +12,18 @@ enum UserRole {
 
 registerEnumType(UserRole, {name: "UserRole"}); //graphQL enum type만들기 
 
-@InputType({ isAbstract: true})
+@InputType({isAbstract: true})
 @ObjectType()
 @Entity()
-export class User extends CoreEntity{ //CoreEntity로 extend -> 모든 entities는 core.entity.ts에서 extends됨
+export class User extends CoreEntity{ //CoreEntity로 extend -> 모든 entitAies는 core.entity.ts에서 extends됨
     @Column()
     @Field(type=>String)
     @IsEmail()
     email: string;
+ 
+    @Column()
+    @Field(type => Number)
+    studentId: number;   
 
     @Column()
     @Field(type=>String)

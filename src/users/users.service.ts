@@ -18,19 +18,22 @@ export class UsersService{
 
     async createAccount({
         email,
+        studentId,
         password, 
         role,
     }: CreateAccountInput): Promise <{ok: boolean, error? :string }>{
         //check new user(that email does not exist)
         try {
             const exists = await this.users.findOne({email}) //findOne = 주어진 condition(환경)과 일치하는 첫 번째 entity 찾기
-            if(exists){
+            const exists2 = await this.users.findOne({studentId})
+            if(exists || exists2){
                 //make error
-                return {ok: false, error: 'There is a uwer with that email already'}; //boolean =false, error ="there~"
+                return {ok: false, error: '이미 가입한 이메일이거나 학번입니다.'}; //boolean =false, error ="there~"
             }
-            await this.users.save(this.users.create({email, password, role})); //없다면 새로운 계정 create & save
+            await this.users.save(this.users.create({email, studentId, password, role})); //없다면 새로운 계정 create & save
             return {ok: true};
         } catch(e){
+            console.log(e);
             return {ok: false, error: "Couldn't create account"};
         }
         // create user & hash the password

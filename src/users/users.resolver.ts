@@ -39,7 +39,7 @@ export class UsersResolver {
     @Mutation(returns => LoginOutput)
     async login(@Args('input') loginInput: LoginInput ): Promise<LoginOutput>{//input Arguments 필요
         try {
-            return  this.usersService.login(loginInput) //loginInput 저장
+            return this.usersService.login(loginInput) //loginInput 저장
         } catch(error){
             return{
                 ok: false,
@@ -69,7 +69,6 @@ export class UsersResolver {
             return{
                 error:"User Not Found",
                 ok: false,
-
             }
         };     
     }

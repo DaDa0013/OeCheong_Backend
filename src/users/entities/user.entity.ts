@@ -29,7 +29,6 @@ export class User extends CoreEntity{ //CoreEntity로 extend -> 모든 entitAies
     @Field(type=>String)
     password: string;
 
-    
     @Column( { type: 'enum', enum : UserRole}) //데이터베이스에 type이 enum인 UserRole
     @Field(type=> UserRole) //type이 UserRole인 graphQL
     @IsEnum(UserRole)

@@ -8,6 +8,8 @@ import * as jwt from 'jsonwebtoken';
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "src/jwt/jwt.service";
 import { EditProfileInput } from "./dtos/edit-profile.dto";
+import { DeleteAccountInput } from "./dtos/delete-account.dto";
+import { userInfo } from "os";
 
 @Injectable()
 export class UsersService{
@@ -44,7 +46,6 @@ export class UsersService{
         email, 
         password
     }: LoginInput): Promise<{ok: boolean; error?:string, token?: string}> {
-
         //make a JWT and give it to the user
         try{
             // find the user with the email
@@ -61,7 +62,7 @@ export class UsersService{
             if (!passwordCorrect){
                 return{
                     ok:false,
-                    error:"Wrong password",
+                    error:"잘못된 비밀번호입니다",
                 };
             }
             const token = this.jwtService.sign(user.id);//이 module을 내 백엔드만으로 특정함
@@ -79,8 +80,8 @@ export class UsersService{
     }
     async findById(id:number): Promise<User>{
         return this.users.findOne({id});
-
     }
+
     async editProfile(userId: number, {email, password}: EditProfileInput){
         const user = await this.users.findOne(userId);
         if(email){
@@ -91,4 +92,26 @@ export class UsersService{
         }
         return this.users.save(user) //db에 entity 존재 유무 체크 안함
     }// save는 entity 없으면 생성함
+
+    async deleteAccount(userId: number, {email, password, studentId}: DeleteAccountInput){
+        const user = await this.users.findOne(userId);
+        try{
+            if(!user){ //user가 존재하지 않는다면
+            return {
+                ok:false,
+                error: '없는 계정입니다',
+            }
+            }
+            await this.users.delete(userId);
+            return{
+                ok: true,
+            }
+        }catch(error){
+            return{
+                ok: false,
+                error,
+            };
+        }
+        
+    }
 }

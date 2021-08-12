@@ -14,5 +14,9 @@ export class CoreEntity {
     @UpdateDateColumn()
     @Field(type=>Date)
     updatedAt:Date;
+    
+    @DeleteDateColumn()
+    @Field(type=>Date)
+    deletedAt: Date;
 
 }
